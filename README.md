@@ -12,6 +12,8 @@ the files as audio buffers.
 and support high-quality professional audio file formats, as well as legacy
 audio file formats natively.
 
+**[Test / Demo](http://epistemex.github.io/audio-reader-js/)**
+
 
 Features
 --------
