@@ -19,6 +19,7 @@
 		<button id="lAIFF">Load AIFF 8-bit</button>
 		<button id="lAU">Load SUN AU 8-bit uLaw</button>
 		<button id="l51">Load 5.1 channel WAVE</button>
+		<!--<button id="lIMA">Load IMA ADPCM 4-bit WAVE</button>-->
 		<br>
 		<br>
 	</div>
@@ -41,12 +42,14 @@
 	    lAIFF = document.getElementById("lAIFF"),
 	    lAU = document.getElementById("lAU"),
 	    l51 = document.getElementById("l51"),
+	    lIMA = document.getElementById("lIMA"),
 		play, res;
 
 	lIFF.onclick = function() {load("colibris.iff")};
 	lAIFF.onclick = function() {load("colibris8.aiff")};
 	lAU.onclick = function() {load("colibris_ulaw_stereo.au")};
 	l51.onclick = function() {load("6ch.wav")};
+	//lIMA.onclick = function() {load("colibris_ima_4bit_adpcm.wav")};
 
 	function load(file) {
 
@@ -80,9 +83,11 @@
 						//opacity    : 0.67
 						//color      : "gold",
 						//bgColor    : "black",
-						//maxChannels: 2, // we can go faster, set these to 1 and use mode=bars
-						quality    : 2
+						//maxChannels: 1, // we can go faster, set these to 1 and use mode=bars
+						quality    : 4
 					}));
+
+					document.body.appendChild(document.createElement("br"));
 
 					startPlay();
 				},

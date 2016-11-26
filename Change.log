@@ -1,6 +1,13 @@
 Change log for AudioReader JS
 -----------------------------
 
+0.7.0 (not public yet)
+ADD: Decoding 4-bit ADPCM
+
+0.6.1 BETA
+CHG: Cancelling 0.6.0 fix for the benefit of size and performance
+FIX: Quality defaulted to 1, should be 2 as per docs.
+
 0.6.0 ALPHA
 FIX: Converting integers to float using proper range for pos/neg numbers
 
@@ -31,4 +38,4 @@ FIX: Time calculation for AIFF had block/offset bytes (8) included
 NEW: Initial release
 
 
-(c) Epistemex 2015
+(c) Epistemex 2015-2016

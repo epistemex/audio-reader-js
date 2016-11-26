@@ -1,9 +1,6 @@
 /*!
-	AudioReader version 0.6.0 ALPHA
-
-	By Epistemex (c) 2015
-	www.epistemex.com
-
+	AudioReader version 0.6.1 BETA
+	(c) 2015-2016 epistemex.com
 	MIT License (this header required)
 */
 
@@ -70,7 +67,7 @@ function AudioReader(input, audioCtx) {
 								channels        : channels,
 								rate            : rate,
 								time            : time,
-								bits            : (((time * channels * rate) / len) | 0) * 8,
+								bits            : ((time * channels * rate) / len)<<3,
 								frames          : len,
 								type            : format || "browser",
 								compression     : "",
@@ -227,12 +224,14 @@ function AudioReader(input, audioCtx) {
 
 			if (chunk.fourcc === ccFmt) {
 
-				formats = [-2, 1]; //, 6, 7, 0x101, 0x102];
+				formats = [-2, 1, 0x11]; //, 6, 7, 0x101, 0x102];
 
 				format = view.getInt16(pos, true);
 				if (formats.indexOf(format) < 0) return {
 					error: errCmpr
 				};
+
+				else if (format === 0x11) comp = "adpcm";
 				//else if (format === 6) comp = "alaw";
 				//else if (format === 7) comp = "ulaw";
 
@@ -287,12 +286,13 @@ function AudioReader(input, audioCtx) {
 				channels = view.getUint32(pos + 8);
 			}
 			else if (chunk.fourcc === ccCFDESC) {
-				rate = view.getFloat64(pos);
 
+				rate = view.getFloat64(pos);
 				formats = [0x6C70636D, 0x756C6177, 0x616C6177];	// lpcm, ulaw, alaw
 				format = view.getUint32(pos + 8);
+
 				if (formats.indexOf(format) < 0) return {
-					error: errcomp
+					error: "Error compression"
 				};
 
 				if (format === 0x756C6177) comp = "ulaw";
@@ -303,7 +303,7 @@ function AudioReader(input, audioCtx) {
 			}
 		}
 
-		frame = (rate * channels * bits) / 8;
+		frame = (rate * channels * bits) >>> 3;
 		if (!frames) frames = Math.ceil(cSize / frame) * rate;
 
 		// get samples - expect one chunk only
@@ -313,7 +313,11 @@ function AudioReader(input, audioCtx) {
 			cSize = chunk.size;
 
 			if (chunk.fourcc === ccData) {
-				aBuffer = convert(actx, view, cSize, pos, channels, rate, bits, frames, true);
+				if (comp === "adpcm") {
+					frames = chunk.size * 8 / channels;
+				}
+
+				aBuffer = convert(actx, view, cSize, pos, channels, rate, bits, frames, true, comp);
 			}
 			else if (chunk.fourcc === ccSSND) {
 				cSize -= 8;	// SSND chunks include block size and offset
@@ -321,7 +325,7 @@ function AudioReader(input, audioCtx) {
 				aBuffer = convert(actx, view, cSize, pos, channels, rate, bits, frames, false);
 			}
 			else if (chunk.fourcc === ccBODY) {
-				//todo possible need to support the SEQN/FADE chunks if sequence data
+				//todo possibly need to support the SEQN/FADE chunks if sequence data
 				aBuffer = convert(actx, view, cSize, pos, channels, rate, bits, frames, false);
 			}
 			else if (chunk.fourcc === ccAUDATA) {
@@ -355,24 +359,40 @@ function AudioReader(input, audioCtx) {
 				block = view.buffer.byteLength - offset,
 				chArr = [],
 				dlt = bits / 8,
-				dithers = [0,1,2,3,3,2,1,0],
+				dithers = new Uint8Array([0,1,2,3,3,2,1,0]),
 				dither = AudioReader.dither,
-				calls = [dither ? get8Dlsb : get8lsb, get16lsb, get24P, get32lsb,
-						 dither ? get8Dmsb : get8msb, get16msb, get24P, get32msb],
-				ci, get;
+				calls = [dither ? get8Dlsb : get8, get16lsb, get24P, get32lsb,
+						 dither ? get8Dmsb : get8, get16msb, get24P, get32msb],
+				ci, get //,
+//				ima_index_table = [
+//					-1, -1, -1, -1, 2, 4, 6, 8,
+//					-1, -1, -1, -1, 2, 4, 6, 8
+//				],
+//				ima_step_table = [
+//					7, 8, 9, 10, 11, 12, 13, 14, 16, 17,
+//					19, 21, 23, 25, 28, 31, 34, 37, 41, 45,
+//					50, 55, 60, 66, 73, 80, 88, 97, 107, 118,
+//					130, 143, 157, 173, 190, 209, 230, 253, 279, 307,
+//					337, 371, 408, 449, 494, 544, 598, 658, 724, 796,
+//					876, 963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066,
+//					2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428, 4871, 5358,
+//					5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899,
+//					15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
+//				]
+				;
 
 			// using compression?
 			if (comp) {
 				if (comp === "ulaw") {
-					get = getUlaw;
+					get = getUlaw
 				}
 				else if (comp === "alaw") {
-					get = getAlaw;
+					get = getAlaw
 				}
 			}
 			else {
 				ci = ((bits / 8) - 1) + (lsb ? 0 : 4);
-				get = calls[ci];
+				get = calls[ci]
 			}
 
 			// build channel array
@@ -384,12 +404,20 @@ function AudioReader(input, audioCtx) {
 
 			if (length > block) length = block;
 
-			while(i < length) {
-				for(j = 0; j < channels;) {
-					chArr[j++][t] = get(pos + i);
-					i += dlt;							// data buffer position
+			if (comp === "adpcm") {
+
+				//todo decode IMA 4-bit ADPCM here
+				console.log("ADPCM 4-bit N/A");
+
+			}
+			else {
+				while(i < length) {
+					for(j = 0; j < channels;) {
+						chArr[j++][t] = get(pos + i);
+						i += dlt;							// data buffer position
+					}
+					t++;									// channel buffer position
 				}
-				t++;									// channel buffer position
 			}
 
 			return aBuffer;
@@ -399,51 +427,42 @@ function AudioReader(input, audioCtx) {
 			return null
 		}
 
-		function get8lsb(pos) {
-			var s = view.getInt8(pos, true);
-			return s < 0 ? s / 128 : s / 127
-		}
-
-		function get8msb(pos) {
-			var s = view.getInt8(pos);
-			return s < 0 ? s / 128 : s / 127
+		function get8(pos) {
+			return view.getInt8(pos) / 128
 		}
 
 		function get16lsb(pos) {
-			var s = view.getInt16(pos, true);
-			return  s < 0 ? s / 32768 : s / 32767
+			return view.getInt16(pos, true) / 0x8000
 		}
 
 		function get16msb(pos) {
-			var s = view.getInt16(pos);
-			return  s < 0 ? s / 32768 : s / 32767
+			return view.getInt16(pos) / 0x8000
 		}
 
 		function get24P(pos) {
-			return ((view.getInt32(pos, true) & 0xffffff) << 8) / 8388607
+			return ((view.getInt32(pos, true) & 0xffffff) << 8) / 0x7fffff
 		}
 
 		//function get24U(pos) {return (view.getInt32(pos, true)}
+
 		function get32lsb(pos) {
-			var s = view.getInt32(pos, true);
-			return s < 0 ? s / 2147483648 : s / 2147483647
+			return view.getInt32(pos, true) / 0x80000000
 		}
 
 		function get32msb(pos) {
-			var s = view.getInt32(pos);
-			return s < 0 ? s / 2147483648 : s / 2147483647
+			return view.getInt32(pos) / 0x80000000
 		}
 
 		function get8Dlsb(pos) {
 			var b = view.getInt8(pos, true) << 8;
 			b = b & ~dithers[b % 8];
-			return b < 0 ? b / 32768 : b / 32767
+			return b / 0x8000
 		}
 
 		function get8Dmsb(pos) {
 			var b = view.getInt8(pos) << 8;
 			b = b & ~dithers[b % 8];
-			return b < 0 ? b / 32768 : b / 32767
+			return b / 0x8000
 		}
 
 		function getUlaw(pos) {
@@ -455,11 +474,14 @@ function AudioReader(input, audioCtx) {
 		}
 
 		function ulaw2norm(sample) {
+
 			sample = ~sample;
+
 			var i = ((sample & 0xf) << 3) + 0x84;
 			i <<= (sample & 0x70) >> 4;
 			sample = sample & 0x80 ? 0x84 - i : i - 0x84;
-			return  sample < 0 ? sample / 32768 : sample / 32767;
+
+			return sample / 0x8000
 		}
 
 		function alaw2norm(a_val) {
@@ -472,19 +494,16 @@ function AudioReader(input, audioCtx) {
 			t = (a_val & 0xf) << 4;
 			seg = (a_val & 0x70) >> 4;
 
-			switch (seg) {
-				case 0:
-					t += 8;
-					break;
-				case 1:
-					t += 0x108;
-					break;
-				default:
-					t += 0x108;
-					t <<= seg - 1;
+			if (seg === 0) t += 8;
+			else if (seg === 1) t += 0x108;
+			else {
+				t += 0x108;
+				t <<= seg - 1;
 			}
+
 			t = (a_val & 0x80) ? t : -t;
-			return  t < 0 ? t / 32768 : t / 32767;
+
+			return  t / 0x8000
 		}
 
 	}
@@ -572,7 +591,7 @@ function AudioReader(input, audioCtx) {
 		}
 
 		// mp3
-		if (head & 0xffffff00 === 0x49443300)	// simple non-secure test, but if it happen to be a ID chunk at the start, why not..
+		if (head>>>8 === 0x494433)	// simple non-secure test, but if it happen to be a ID chunk at the start, why not..
 			return "mp3";
 
 		//todo need to parse buffer to detect frames for mp3 0xfff/0xffe, calc frame size, check next...
