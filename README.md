@@ -19,7 +19,7 @@ Features
 - Loads various professional and legacy audio files natively in the browser:
 - **Amiga IFF** (8SVX) files (8 bits mono/stereo, PCM)
 - **Apple AIFF** files (8/24/16/32 bits multi channel, PCM)
-- **Apple CAFF** files (8/24/16/32 bits multi channel, PCM/µLaw/A-law)
+- **Apple CAFF** files (8/24/16/32 bits multi channel, PCM/µLaw/A-law) (limited to 32-bit file size)
 - **Sun AU/SND** files (8/16/24/32 bits multi-channel, PCM/µLaw/A-law)
 - **Windows WAVE**<sup>1</sup> files (8/24/16/32 bits multi channel, PCM)
 - Tries supported formats first internally (MP3, OGG etc.)
@@ -49,7 +49,7 @@ limitations to things such as bit formats etc.
 Install
 -------
 
-**AudioReader** can be installed using:
+**audio-reader-js** can be installed using:
 
 - Git over HTTPS: `git clone https://github.com/epistemex/audio-reader-js.git`
 - Git over SSH: `git clone git@github.com:epistemex/audio-reader-js.git`
@@ -59,32 +59,46 @@ Install
 Usage
 -----
 
-**AudioReader** uses promises and provides an `AudioBuffer` that can be used with
+**audio-reader-js** uses promises and provides an `AudioBuffer` that can be used with
 the Audio API. An example showing how you can load and play an audio file:
 
-	AudioReader("http://path.to/audio.iff").then(function(res) {
+    AudioReader("http://path.to/audio.iff").then(function(res) {
 
-		var actx = res.audioContext,				// the shared audio context
-		    source = actx.createBufferSource();		// create a playback buffer
+        var actx = res.audioContext,                // the shared audio context
+            source = actx.createBufferSource();     // create a playback buffer
 
-		source.buffer = res.buffer;					// use parsed file as data source
-		source.connect(actx.destination);			// default output
-		source.start(0);							// play - voila!
-	},
-	alert);											// show errors if any
+        source.buffer = res.buffer;                 // use parsed file as data source
+        source.connect(actx.destination);           // default output
+        source.start(0);                            // play - voila!
+    },
+    alert);
 
 or use the built-in convenience method to do the same this way:
 
-	AudioReader("http://path.to/audio.au").then(function(res) {
+    AudioReader("http://path.to/audio.au").then(function(res) {
         res.createPlayerObject().start();
-	},
-	alert);											// show errors if any
+    },
+    alert);
+
+Issues
+------
+
+The current code base can be considered experimental in the sense it needs
+refactoring and more testing.
+
+Although the parsing and generated data appear to be stable we won't recommend
+production usage at the moment - you'll use it at your own risk.
+
+If you find it to not work with certain samples it claim support for, feel
+free to provide a downloadable link in issues (please check the list above
+first as not all versions of a single format is necessarily intended to be
+supported).
 
 
 Requirements
 ------------
 
-An "evergreen" browser with support for Audio API (HTML5).
+An "evergreen" browser with support for Web Audio API (HTML5).
 It will work in recent Firefox, Chrome, Safari, Edge and Opera.
 
 IE, Opera Mini and Android Browser does not support the Audio API.

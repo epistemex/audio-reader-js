@@ -1,8 +1,5 @@
-Change log for AudioReader JS
------------------------------
-
-0.7.0 (not public yet)
-ADD: Decoding 4-bit ADPCM
+Change log for audio-reader-js
+------------------------------
 
 0.6.1 BETA
 CHG: Cancelling 0.6.0 fix for the benefit of size and performance
