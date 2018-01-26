@@ -1,14 +1,14 @@
-﻿AudioReader JS
-==============
+﻿audio-reader-js
+===============
 
-**AudioReader** is a "low-level" implementation that enables browsers
+**audio-reader-js** is a "low-level" implementation that enables browsers
 to read and play AIFF, CAFF, SUN AU, IFF-8SVX and multi-channel WAVE
-audio files without the need for any plugins.
+audio files directly in the client.
 
-**AudioReader** uses JavaScript and the HTML5 Audio API to parse and provide
+**audio-reader-js** uses JavaScript and the HTML5 Audio API to parse and provide
 the files as audio buffers.
 
-**AudioReader** is primarily intended for developers who wish to implement
+**audio-reader-js** is primarily intended for developers who wish to implement
 and support high-quality professional audio file formats, as well as legacy
 audio file formats natively.
 
@@ -22,7 +22,7 @@ Features
 - **Apple CAFF** files (8/24/16/32 bits multi channel, PCM/µLaw/A-law)
 - **Sun AU/SND** files (8/16/24/32 bits multi-channel, PCM/µLaw/A-law)
 - **Windows WAVE**<sup>1</sup> files (8/24/16/32 bits multi channel, PCM)
-- Tries internally supported formats first (MP3, OGG etc.)
+- Tries supported formats first internally (MP3, OGG etc.)
 - Optional noise-dithering of 8-bit data
 - All sample data is directly normalized to floating point buffer to preserve the highest quality
 - Uses binary check to determine file type (extension and mime is ignored)
@@ -51,7 +51,6 @@ Install
 
 **AudioReader** can be installed using:
 
-- Bower: `bower install audio-reader-js`
 - Git over HTTPS: `git clone https://github.com/epistemex/audio-reader-js.git`
 - Git over SSH: `git clone git@github.com:epistemex/audio-reader-js.git`
 - Download [zip archive](https://github.com/epistemex/audio-reader-js/archive/master.zip) and extract.
@@ -86,9 +85,9 @@ Requirements
 ------------
 
 An "evergreen" browser with support for Audio API (HTML5).
-It will work in recent Firefox, Chrome, Safari and Opera.
+It will work in recent Firefox, Chrome, Safari, Edge and Opera.
 
-IE, Opera Mini and Android Browser does not currently support the Audio API.
+IE, Opera Mini and Android Browser does not support the Audio API.
 
 
 License
