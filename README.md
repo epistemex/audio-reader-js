@@ -32,7 +32,7 @@ Features
 
 The new fast wave render plugin:
 
-![Waveform](http://i.imgur.com/Q5EQWL3.png)
+![Waveform](https://i.imgur.com/Q5EQWL3.png)
 
 **Notes**
 
