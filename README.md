@@ -114,4 +114,4 @@ The included music is copyrighted by Ken Nilsen/Epistemex and may be distributed
 
 *&copy; 2015-2016 Epistemex*
 
-![Epistemex](http://i.imgur.com/wZSsyt8.png)
+![Epistemex](https://i.imgur.com/wZSsyt8.png)
