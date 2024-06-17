@@ -1,6 +1,9 @@
 Change log for audio-reader-js
 ------------------------------
 
+1.0.0-beta
+For future changes, see the git log directly.
+
 0.6.1 BETA
 CHG: Cancelling 0.6.0 fix for the benefit of size and performance
 FIX: Quality defaulted to 1, should be 2 as per docs.
