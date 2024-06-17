@@ -21,77 +21,77 @@
  */
 AudioReader.render = function(options) {
 
-	var result = options.data,
-		abuffer = result.buffer,
-		channels = Math.min(options.maxChannels || 99, result.channels),
-		quality = options.quality || 2,
-		opacity = options.opacity || 1 / (channels * quality),
-		w = options.width || 640,
-		h = options.height || 64,
-		h2 = h >> 1,
-		len = abuffer.getChannelData(0).length,
-		step = Math.max(1, len / w),
-		subStep = step / quality,
-		channel, k = 0, t = 0, i, x, v, offset = 0,
-		mode = options.mode || "bars",
-		canvas = document.createElement("canvas"),
-		ctx = canvas.getContext("2d");
+  const result = options.data;
+  const abuffer = result.buffer;
+  const channels = Math.min(options.maxChannels || 99, result.channels);
+  const quality = options.quality || 2;
+  const opacity = options.opacity || 1 / (channels * quality);
+  const w = options.width || 640;
+  const h = options.height || 64;
+  const h2 = h >> 1;
+  const len = abuffer.getChannelData(0).length;
+  const step = Math.max(1, len / w);
+  const subStep = step / quality;
+  const mode = options.mode || 'bars';
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  let channel, k = 0, t = 0, i, x, v, offset = 0;
 
-	canvas.width = w;
-	canvas.height = h;
+  canvas.width = w;
+  canvas.height = h;
 
-	if (options.bgColor) {
-		ctx.fillStyle = options.bgColor;
-		ctx.fillRect(0, 0, w, h)
-	}
+  if ( options.bgColor ) {
+    ctx.fillStyle = options.bgColor;
+    ctx.fillRect(0, 0, w, h);
+  }
 
-	ctx.fillStyle = options.color || "#000";
+  ctx.fillStyle = options.color || '#000';
 
-	ctx.globalAlpha = opacity;
-	ctx.translate(0, h2);
+  ctx.globalAlpha = opacity;
+  ctx.translate(0, h2);
 
-	if (mode === "mirror") {
-		while(k++ < quality) {
-			t = 0;
-			while(t < channels) {
-				channel = abuffer.getChannelData(t++);
-				ctx.beginPath();
-				ctx.moveTo(0, 0);
-				for(i = offset, x = 0; i < len; i += step) {
-					v = Math.abs((channel[i|0] * h2)|0);
-					ctx.lineTo(x++, -v);
-				}
-				ctx.lineTo(w, 0);
-				ctx.fill();
-				ctx.scale(1, -1);
-				ctx.drawImage(canvas, 0, -h2);
-				ctx.scale(1, -1);
-			}
-			offset += subStep;
-		}
-	}
-	else {
-		while(k++ < quality) {
-			t = 0;
-			while(t < channels) {
-				channel = abuffer.getChannelData(t++);
-				ctx.beginPath();
-				for(i = offset, x = 0; i < len; i += step) {
-					v = Math.abs((channel[i|0] * h2)|0);
-					ctx.rect(x++, -v, 1, v<<1)
-				}
-				ctx.fill();
-			}
-			offset += subStep;
-		}
-	}
+  if ( mode === 'mirror' ) {
+    while( k++ < quality ) {
+      t = 0;
+      while( t < channels ) {
+        channel = abuffer.getChannelData(t++);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        for(i = offset, x = 0; i < len; i += step) {
+          v = Math.abs((channel[ i | 0 ] * h2) | 0);
+          ctx.lineTo(x++, -v);
+        }
+        ctx.lineTo(w, 0);
+        ctx.fill();
+        ctx.scale(1, -1);
+        ctx.drawImage(canvas, 0, -h2);
+        ctx.scale(1, -1);
+      }
+      offset += subStep;
+    }
+  }
+  else {
+    while( k++ < quality ) {
+      t = 0;
+      while( t < channels ) {
+        channel = abuffer.getChannelData(t++);
+        ctx.beginPath();
+        for(i = offset, x = 0; i < len; i += step) {
+          v = Math.abs((channel[ i | 0 ] * h2) | 0);
+          ctx.rect(x++, -v, 1, v << 1);
+        }
+        ctx.fill();
+      }
+      offset += subStep;
+    }
+  }
 
-	ctx.beginPath();
-	ctx.strokeStyle = ctx.fillStyle;
-	ctx.globalAlpha = 1;
-	ctx.moveTo(0, 0.5);
-	ctx.lineTo(w, 0.5);
-	ctx.stroke();
+  ctx.beginPath();
+  ctx.strokeStyle = ctx.fillStyle;
+  ctx.globalAlpha = 1;
+  ctx.moveTo(0, 0.5);
+  ctx.lineTo(w, 0.5);
+  ctx.stroke();
 
-	return canvas
+  return canvas;
 };
