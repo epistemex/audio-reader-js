@@ -1,7 +1,7 @@
 ﻿audio-reader-js
 ===============
 
-**audio-reader-js** is a "low-level" implementation that enables browsers
+**audio-reader-js** is a 'low-level' implementation that enables browsers
 to read and play AIFF, CAFF, SUN AU, IFF-8SVX and multi-channel WAVE
 audio files directly in the client.
 
@@ -40,7 +40,7 @@ The new fast wave render plugin:
 limitations to things such as bit formats etc.
 - Parsing 32/64 floating point data not supported (yet)
 - No buffering. The complete file is loaded into memory.
-- Chrome issue: detects and accepts some audio formats but cannot decode them. Currently these files are forced through AudioReader to fix.
+- Chrome issue: detects and accepts some audio formats but cannot decode them. Currently, these files are forced through AudioReader to fix.
 - Chrome issue: does not support surround audio (5.1 etc.) (try run it with the `--force-wave-audio` or `--disable-audio-output-resampler` option). No fix.
 - Chrome issue: (webkit)onended handler seem to only be called when stop() is issued, not when actually ending. No fix (use setTimeout as a work-around if needed).
 - IE issue: does not support Audio API at all, nor promises (polyfills may work - untested)
@@ -64,16 +64,16 @@ the Audio API. An example showing how you can load and play an audio file:
 
     AudioReader("http://path.to/audio.iff").then(function(res) {
 
-        var actx = res.audioContext,                // the shared audio context
-            source = actx.createBufferSource();     // create a playback buffer
+        const actx = res.audioContext;              // the shared audio context
+        const source = actx.createBufferSource();   // create a playback buffer
 
         source.buffer = res.buffer;                 // use parsed file as data source
         source.connect(actx.destination);           // default output
-        source.start(0);                            // play - voila!
+        source.start(0);                            // play
     },
     alert);
 
-or use the built-in convenience method to do the same this way:
+or use the built-in convenience method to do the same:
 
     AudioReader("http://path.to/audio.au").then(function(res) {
         res.createPlayerObject().start();
@@ -89,7 +89,7 @@ refactoring and more testing.
 Although the parsing and generated data appear to be stable we won't recommend
 production usage at the moment - you'll use it at your own risk.
 
-If you find it to not work with certain samples it claim support for, feel
+If you find it to not work with certain samples it claims support for, feel
 free to provide a downloadable link in issues (please check the list above
 first as not all versions of a single format is necessarily intended to be
 supported).
@@ -112,6 +112,6 @@ Released under [MIT license](http://choosealicense.com/licenses/mit/). You may u
 The included music is copyrighted by Ken Nilsen/Epistemex and may be distributed freely for test use.
 
 
-*&copy; 2015-2016 Epistemex*
+*&copy; 2015-2016, 2024 Epistemex*
 
 ![Epistemex](https://i.imgur.com/wZSsyt8.png)
